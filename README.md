@@ -1,10 +1,10 @@
 # Docker-Compose Environment for ML Development
 ## Overview
-Stack: Spark, JupyterLab, Python  
-Containers: cluster-base, spark-base, spark-master, spark-worker, jupyterlab  
-Requirements: docker, docker-compose (tested on Ubuntu Server 22.04)  
-Tested Host OS: Ubuntu Server 22.04.2 LTS  
-Coming Soon: Hadoop integration, JupyterHub integration, open Spark to outside applications  
+**Stack:** Spark, JupyterLab, Python  
+**Containers:** cluster-base, spark-base, spark-master, spark-worker, jupyterlab  
+**Requirements:** docker, docker-compose  
+**Tested Host OS:** Ubuntu Server 22.04.2 LTS  
+**Coming Soon:** Hadoop integration, JupyterHub integration, open Spark to outside applications  
 
 ## Description
 This project provides a docker-compose environment that serves a JupyterLab 
