@@ -1,9 +1,5 @@
 version: "3.8"
 
-volumes:
-  shared-workspace:
-    name: "hadoop-distributed-file-system"
-    driver: local
 services:
   jupyterlab:
     image: jupyterlab
@@ -32,7 +28,8 @@ services:
       NETWORK_ACCESS: "internal"
     ports:
       # - ${SPARK_MASTER_WEBUI_PORT}:8080
-      - 7077:7077
+      #- 7077:7077  # allow docker network access
+      - ${SPARK_MASTER_PORT}:7077  # allow host/VPN access
     volumes:
       - shared-workspace:/opt/workspace
     networks:
@@ -53,6 +50,11 @@ services:
       - "proxnet-ext"
     depends_on:
       - spark-master
+
+volumes:
+  shared-workspace:
+    name: "hadoop-distributed-file-system"
+    driver: local
 
 networks:
   proxnet-ext:
