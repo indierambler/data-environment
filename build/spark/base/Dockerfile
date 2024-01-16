@@ -54,6 +54,7 @@ ENV SPARK_HOME /usr/bin/${SPARK_ARCHIVE_NAME}
 ENV SPARK_MASTER_HOST spark-master
 ENV SPARK_MASTER_PORT 7077
 ENV PYSPARK_PYTHON python3
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 
 # *****Runtime*****
