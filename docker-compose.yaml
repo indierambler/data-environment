@@ -1,0 +1,157 @@
+services:
+  # HADOOP
+  hadoop-namenode:
+    build: ./build/hadoop/namenode
+    container_name: hadoop-namenode
+    restart: unless-stopped
+    environment:
+      CLUSTER_NAME: ${HADOOP_CLUSTER_NAME}
+      VIRTUAL_HOST: ${HADOOP_SUBDOMAIN}  # define for reverse proxy
+      VIRTUAL_PORT: 9870  # define internal port to forward to reverse proxy
+      LETSENCRYPT_HOST: ${SPARK_SUBDOMAIN}  # define for encyption cert
+      NETWORK_ACCESS: "internal"  # define to limit access to local network
+    env_file:
+      - ./build/hadoop/hadoop.env
+    ports:
+      #- $HADOOP_NAMENODE_PORT1:9870  # allow host/VPN access
+      - $HADOOP_NAMENODE_PORT2:9000
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    networks:
+      - "proxnet-ext"
+
+  hadoop-datanode:
+    build: ./build/hadoop/datanode
+    container_name: hadoop-datanode
+    restart: unless-stopped
+    environment:
+      SERVICE_PRECONDITION: "hadoop-namenode:9870"
+    env_file:
+      - ./build/hadoop/hadoop.env
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    networks:
+      - "proxnet-ext"
+  
+  hadoop-resourcemanager:
+    build: ./build/hadoop/resourcemanager
+    container_name: hadoop-resourcemanager
+    restart: unless-stopped
+    environment:
+      SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864"
+    env_file:
+      - ./build/hadoop/hadoop.env
+    networks:
+      - "proxnet-ext"
+
+  hadoop-nodemanager-1:
+    build: ./build/hadoop/nodemanager
+    container_name: hadoop-nodemanager-1
+    restart: unless-stopped
+    environment:
+      SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864 hadoop-resourcemanager:8088"
+    env_file:
+      - ./build/hadoop/hadoop.env
+    networks:
+      - "proxnet-ext"
+
+  hadoop-historyserver:
+    build: ./build/hadoop/historyserver
+    container_name: hadoop-historyserver
+    restart: unless-stopped
+    environment:
+      SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864 hadoop-resourcemanager:8088"
+    env_file:
+      - ./build/hadoop/hadoop.env
+    volumes:
+      - hadoop_historyserver:/hadoop/yarn/timeline
+    networks:
+      - "proxnet-ext"
+
+  # SPARK
+  spark-master:
+    build: ./build/spark/master
+    container_name: spark-master
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: ${SPARK_SUBDOMAIN}  # define for reverse proxy
+      VIRTUAL_PORT: 8080  # define internal port to forward to reverse proxy
+      LETSENCRYPT_HOST: ${SPARK_SUBDOMAIN}  # define for encryption cert
+      NETWORK_ACCESS: "internal"  # define to limit access to local network
+    ports:
+      # - ${SPARK_MASTER_WEBUI_PORT}:8080
+      #- 7077:7077  # allow docker network access
+      - ${SPARK_MASTER_PORT}:7077  # allow host/VPN access
+    volumes:
+      - shared-workspace:/opt/workspace
+    networks:
+      - "proxnet-ext"
+
+  spark-worker-1:
+    build: ./build/spark/worker
+    container_name: spark-worker-1
+    restart: unless-stopped
+    environment:
+      - SPARK_WORKER_CORES=${SPARK_WORKER1_CORES}
+      - SPARK_WORKER_MEMORY=${SPARK_WORKER1_MEMORY}
+    ports:
+      - ${SPARK_WORKER1_WEBUI_PORT}:8081  # 8081 defined in dockerfile
+    volumes:
+      - shared-workspace:/opt/workspace
+    networks:
+      - "proxnet-ext"
+    depends_on:
+      - spark-master
+
+  # JUPYTER
+  jupyterlab:
+    build: ./build/jupyter/lab
+    container_name: jupyterlab
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: ${JUPYTER_SUBDOMAIN}  # define for reverse proxy
+      VIRTUAL_PORT: 8888  # define internal port to forward to reverse proxy
+      LETSENCRYPT_HOST: ${JUPYTER_SUBDOMAIN}  # define for encryption cert
+      NETWORK_ACCESS: "internal"  # define to limit access to local network
+    #ports:  # define port alias if the host machine doesn't use a public ip
+    #  - ${JUPYTER_PORT}:8888
+    volumes:
+      - shared-workspace:/opt/workspace
+    networks:
+      - "proxnet-ext"
+
+
+volumes:
+  hadoop_namenode:
+    name: "hadoop-namenode-vol"
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $HADOOP_NAMENODE_DIR
+  hadoop_datanode:
+    name: "hadoop-datanode-vol"
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $HADOOP_DATANODE_DIR
+  hadoop_historyserver:
+    name: "hadoop-historyserver-vol"
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $HADOOP_HISTORYSERVER_DIR
+  shared-workspace:
+    name: "hadoop-distributed-file-system"
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $HDFS_DIR
+
+
+networks:
+  proxnet-ext:
+    external: true
