@@ -5,6 +5,8 @@ FROM debian:bullseye-slim
 
 
 # *****Settings*****
+# internal directory for workspace shared between containers
+ENV shared_workspace=/opt/workspace
 # validate --build-args from build script
 ARG hadoop_version
 ARG spark_version
@@ -30,7 +32,8 @@ ENV historyserver_dir=${historyserver_dir}
 COPY ${base_dir}/test.py /
 
 # update OS and inatall packages
-RUN apt-get update && \
+RUN mkdir -p ${shared_workspace} && \
+    apt-get update && \
     apt-get upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     default-jre-headless \

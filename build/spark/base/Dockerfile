@@ -10,7 +10,7 @@ FROM debian:bullseye-slim
 # internal java version (not used)
 #ARG java_version=17-jre  # latest LTS version
 # internal directory for workspace shared between containers
-ARG shared_workspace=/opt/workspace
+ENV shared_workspace=/opt/workspace
 # spark_version set in spark build script
 ARG spark_version
 ENV spark_version=${spark_version}
@@ -53,6 +53,7 @@ ENV hadoop_version=${hadoop_version}
 ENV SPARK_HOME /usr/bin/${SPARK_ARCHIVE_NAME}
 ENV SPARK_MASTER_HOST spark-master
 ENV SPARK_MASTER_PORT 7077
+ENV SPARK_CONNECT_PORT 15002
 ENV PYSPARK_PYTHON python3
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
