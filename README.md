@@ -4,6 +4,7 @@
 - Spark/Spark-Connect/PySpark  
 - Hadoop/HDFS  
 - JupyterLab  
+
 **Containers:**  
 - spark-master
 - spark-worker-1
@@ -13,12 +14,16 @@
 - hadoop-nodemanager-1
 - hadoop-historyserver
 - jupyterlab  
+
 **Server Requirements:**  
 docker  
+
 **Local Requirements**  
 java-jdk  
+
 **Tested Host OS:**  
 Ubuntu Server 22.04.2 LTS  
+
 **Coming Soon:**  
 - JupyterHub integration
 - LocalStack S3 integration  
@@ -39,10 +44,10 @@ development, and personal datastack experience.
 3. Create and Update the .env file  
 ```mv sample-env.md .env```  
 Make sure to update the values inside the new .env file (```nano .env```)  
-- set subdomain values only if connecting to a reverse proxy
-- set directories to local locations where container data can be stored
-- set IP addresses to your local server's network address (ports can stay the same)
-- allocate cores and memory based on what is available in your system
+    - set subdomain values only if connecting to a reverse proxy
+    - set directories to local locations where container data can be stored
+    - set IP addresses to the local server's network address (ports need no change)
+    - allocate cores and memory based on what is available in your system
 4. Add execute permissions to build scripts  
 ```chmod +x build/build.sh build/*/build.sh```
 5. Build the docker base images  
