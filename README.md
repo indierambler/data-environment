@@ -1,7 +1,7 @@
-# Docker-Compose Environment for ML Development
+# Docker-Compose Environment for Big Data Research and Development
 ## Overview
-**Stack:** Spark/Spark-Connect/PySpark, Hadoop/HDFS, JupyterLab   
-**Containers:**
+**Stack:** Spark/Spark-Connect/PySpark, Hadoop/HDFS, JupyterLab  
+**Containers:**  
 - spark-master
 - spark-worker-1
 - hadoop-namenode
@@ -10,16 +10,16 @@
 - hadoop-nodemanager-1
 - hadoop-historyserver
 - jupyterlab
-**Server Requirements:** docker
-**Local Requirements** java jdk
+**Server Requirements:** docker  
+**Local Requirements** java jdk  
 **Tested Host OS:** Ubuntu Server 22.04.2 LTS  
 **Coming Soon:** JupyterHub integration, LocalStack S3 integration  
 
 ## Description
 This project provides a docker compose environment that serves JupyterLab, a
-scalable Spark cluster, and a hadoop file system. The JupyterLab instance has
-direct access to the Spark cluster and hadoop resources. Spark and Hadoop
-instances can also be accessed and used through a remote machine via
+scalable Spark cluster, and a scalable Hadoop file system. The JupyterLab
+instance has direct access to the Spark cluster and hadoop resources. Spark
+and Hadoop instances can also be accessed and used through a remote machine via
 Spark-Connect. This is useful for scalable data analytics, machine learning
 development, and personal datastack experience.
 
@@ -28,21 +28,50 @@ development, and personal datastack experience.
 ```git clone git@github.com:indierambler/data-environment```
 2. Move into the new project directory  
 ```cd data-environment```
-3. Create the .env file  
-```mv sample-env.md .env```
-4. Add execute permissions to build scripts
+3. Create and Update the .env file  
+```mv sample-env.md .env```  
+Make sure to update the values inside the new .env file (```nano .env```)  
+-- set subdomain values only if connecting to a reverse proxy
+-- set directories to local locations where container data can be stored
+-- set IP addresses to your local server's network address (ports can stay the same)
+-- allocate cores and memory based on what is available in your system
+4. Add execute permissions to build scripts  
 ```chmod +x build/build.sh build/*/build.sh```
-5. Build the docker base images
+5. Build the docker base images  
 ```build/build.sh```
 6. Launch the containers  
 ```docker-compose up -d```
 
-## Access User Interfaces
-- Spark master web UI  
-[http://localhost:8080](http://localhost:8080)
-- JupyterLab  web UI  
-[http://localhost:8888](http://localhost:8888)
-- Spark-Connect URL
-sc://<SERVER_IP_ADDR>:<SPARK_CONNECT_PORT>
-- Spark master URL
-spark://<SERVER_IP_ADDR>:<SPARK_MASTER_PORT>
+## Pull Updates
+1. Move into data-environment directory
+```cd path/to/data-environment```
+2. Make sure data-environment is shut down
+```docker compose down```
+3. Pull Any Exiting Git Changes
+```git pull```
+4. Start data-environment back up
+```docker compose up -d```
+
+## Access Interfaces
+### From Local Machine (server) running the data-environment
+- JupyterLab web UI: [http://localhost:8888](http://localhost:8888)
+- Hadoop web UI: [http://localhost:9870](http://localhost:9870)
+- Spark master web UI: [http://localhost:8080](http://localhost:8080)
+- Spark master URL: spark://local[n]:<SPARK_MASTER_PORT> (n = # of cores to use)
+### From Remote Machine (client) with SSH access to server running data-environment
+- JupyterLab web UI: http://<SERVER_IP_ADDR>:8888
+- Hadoop web UI: http://<SERVER_IP_ADDR>:9870
+- Spark master web UI: http://<SERVER_IP_ADDR>:8080
+- Spark-Connect URL: sc://<SERVER_IP_ADDR>:<SPARK_CONNECT_PORT>
+
+## Spark and HDFS Interactions
+A Jupyter Notebook file for learning and testing basic interactions with Spark
+and HDFS will be available soon.
+
+## Using With Nginx Reverse Proxy
+This project is set up to work with the
+[nginx-proxy/nginx-proxy](https://github.com/nginx-proxy/nginx-proxy) project.
+Some things to keep in mind when connecting up to the reverse proxy:  
+- Make sure the reverse proxy and data-environment docker-compose.yaml files
+put all services on the same docker network
+- Make sure docker-compose/.env subdomains are set correctly
