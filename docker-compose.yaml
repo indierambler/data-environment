@@ -3,6 +3,7 @@ services:
   hadoop-namenode:
     build: ./build/hadoop/namenode
     container_name: hadoop-namenode
+    hostname: hadoop-namenode
     restart: unless-stopped
     environment:
       CLUSTER_NAME: ${HADOOP_CLUSTER_NAME}
@@ -13,8 +14,8 @@ services:
     env_file:
       - ./build/hadoop/hadoop.env
     ports:
-      #- $HADOOP_NAMENODE_PORT1:9870  # allow host/VPN access
-      - $HADOOP_NAMENODE_PORT2:9000
+      #- $HADOOP_NAMENODE_HTTP_PORT:9870  # allow host/VPN access
+      - $HADOOP_NAMENODE_IPC_PORT:9000  # allow host/VPN access
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
       - shared-workspace:/opt/workspace
@@ -24,11 +25,14 @@ services:
   hadoop-datanode:
     build: ./build/hadoop/datanode
     container_name: hadoop-datanode
+    hostname: hadoop-datanode
     restart: unless-stopped
     environment:
       SERVICE_PRECONDITION: "hadoop-namenode:9870"
     env_file:
       - ./build/hadoop/hadoop.env
+    ports:
+      - $HADOOP_DATANODE_PORT:9864  # allow host/VPN access
     volumes:
       - hadoop_datanode:/hadoop/dfs/data
       - shared-workspace:/opt/workspace
