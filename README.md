@@ -16,13 +16,13 @@
 - jupyterlab  
 
 **Server Requirements:**  
-docker  
+- docker  
 
-**Local Requirements**  
-java-jdk  
+**Local Requirements:**  
+- java-jdk  
 
 **Tested Host OS:**  
-Ubuntu Server 22.04.2 LTS  
+- Ubuntu Server 22.04.2 LTS  
 
 **Coming Soon:**  
 - JupyterHub integration
