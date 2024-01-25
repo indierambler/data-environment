@@ -79,7 +79,10 @@ Make sure to update the values inside the new .env file (```nano .env```)
 
 ## Spark and HDFS Interactions
 A Jupyter Notebook for learning and testing basic interactions with Spark
-and HDFS will be available soon.
+and HDFS can be found in the project folder at
+[data-environment/demo/spark-demo.ipynb](https://github.com/indierambler/data-environment/blob/master/demo/spark-demo.ipynb).
+This file can be used on a remote machine with SSH access to the Spark/Hadoop
+server or uploaded directly to the JupyterLab instance for testing.
 
 ## Using With Nginx Reverse Proxy
 This project is set up to work with the
