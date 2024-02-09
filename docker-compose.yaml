@@ -2,7 +2,7 @@ services:
   # HADOOP
   hadoop-namenode:
     build: ./build/hadoop/namenode
-    container_name: hadoop-namenode
+    container_name: ${PROJECT_NAME}-hadoop-namenode
     hostname: hadoop-namenode
     restart: unless-stopped
     environment:
@@ -24,7 +24,7 @@ services:
 
   hadoop-datanode:
     build: ./build/hadoop/datanode
-    container_name: hadoop-datanode
+    container_name: ${PROJECT_NAME}-hadoop-datanode
     hostname: hadoop-datanode
     restart: unless-stopped
     environment:
@@ -41,7 +41,7 @@ services:
   
   hadoop-resourcemanager:
     build: ./build/hadoop/resourcemanager
-    container_name: hadoop-resourcemanager
+    container_name: ${PROJECT_NAME}-hadoop-resourcemanager
     restart: unless-stopped
     environment:
       SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864"
@@ -52,7 +52,7 @@ services:
 
   hadoop-nodemanager-1:
     build: ./build/hadoop/nodemanager
-    container_name: hadoop-nodemanager-1
+    container_name: ${PROJECT_NAME}-hadoop-nodemanager-1
     restart: unless-stopped
     environment:
       SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864 hadoop-resourcemanager:8088"
@@ -63,7 +63,7 @@ services:
 
   hadoop-historyserver:
     build: ./build/hadoop/historyserver
-    container_name: hadoop-historyserver
+    container_name: ${PROJECT_NAME}-hadoop-historyserver
     restart: unless-stopped
     environment:
       SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864 hadoop-resourcemanager:8088"
@@ -78,7 +78,7 @@ services:
   # SPARK
   spark-master:
     build: ./build/spark/master
-    container_name: spark-master
+    container_name: ${PROJECT_NAME}-spark-master
     restart: unless-stopped
     environment:
       VIRTUAL_HOST: ${SPARK_SUBDOMAIN}  # define for reverse proxy
@@ -99,7 +99,7 @@ services:
 
   spark-worker-1:
     build: ./build/spark/worker
-    container_name: spark-worker-1
+    container_name: ${PROJECT_NAME}-spark-worker-1
     restart: unless-stopped
     environment:
       - SPARK_WORKER_CORES=${SPARK_WORKER1_CORES}
@@ -116,7 +116,7 @@ services:
   # JUPYTER
   jupyterlab:
     build: ./build/jupyter/lab
-    container_name: jupyterlab
+    container_name: ${PROJECT_NAME}-jupyter-lab
     restart: unless-stopped
     environment:
       VIRTUAL_HOST: ${JUPYTER_SUBDOMAIN}  # define for reverse proxy
@@ -133,33 +133,33 @@ services:
 
 volumes:
   hadoop_namenode:
-    name: "hadoop-namenode-vol"
+    name: ${PROJECT_NAME}-hadoop-namenode-vol
     driver: local
     driver_opts:
       type: none
       o: bind
       device: $HADOOP_NAMENODE_DIR
   hadoop_datanode:
-    name: "hadoop-datanode-vol"
+    name: ${PROJECT_NAME}-hadoop-datanode-vol
     driver: local
     driver_opts:
       type: none
       o: bind
       device: $HADOOP_DATANODE_DIR
   hadoop_historyserver:
-    name: "hadoop-historyserver-vol"
+    name: ${PROJECT_NAME}-hadoop-historyserver-vol
     driver: local
     driver_opts:
       type: none
       o: bind
       device: $HADOOP_HISTORYSERVER_DIR
   shared-workspace:
-    name: "hadoop-distributed-file-system"
+    name: ${PROJECT_NAME}-shared-vol
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: $HDFS_DIR
+      device: $SHARED_DIR
 
 
 networks:
