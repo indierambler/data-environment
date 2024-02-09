@@ -5,11 +5,14 @@
 # 1. rename this file to ".env" and leave in the project's root directory
 # 2. replace the environment variables with desired values 
 
+# Main settings
+PROJECT_NAME=dataenv
+SHARED_DIR=/path/to/shared/container/workspace
+
 # Hadoop settings
 HADOOP_SUBDOMAIN="hadoop.domain.com"
 HADOOP_VERSION="3.3.6"
 HADOOP_CLUSTER_NAME=my_hadoop_cluster
-HDFS_DIR=/path/to/shared/container/workspace
 HADOOP_NAMENODE_DIR=/my/hadoop/volumes/namenode
 HADOOP_DATANODE_DIR=/my/hadoop/volumes/datanode
 HADOOP_HISTORYSERVER_DIR=/my/hadoop/volumes/historyserver
