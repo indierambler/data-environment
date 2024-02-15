@@ -3,10 +3,10 @@ services:
   hadoop-namenode:
     build: ./build/hadoop/namenode
     container_name: ${PROJECT_NAME}-hadoop-namenode
-    hostname: hadoop-namenode
+    hostname: ${PROJECT_NAME}-hadoop-namenode
     restart: unless-stopped
     environment:
-      CLUSTER_NAME: ${HADOOP_CLUSTER_NAME}
+      CLUSTER_NAME: ${PROJECT_NAME}-cluster
       VIRTUAL_HOST: ${HADOOP_SUBDOMAIN}  # define for reverse proxy
       VIRTUAL_PORT: 9870  # define internal port to forward to reverse proxy
       LETSENCRYPT_HOST: ${SPARK_SUBDOMAIN}  # define for encyption cert
@@ -17,25 +17,25 @@ services:
       #- $HADOOP_NAMENODE_HTTP_PORT:9870  # allow host/VPN access
       - $HADOOP_NAMENODE_IPC_PORT:9000  # allow host/VPN access
     volumes:
-      - hadoop_namenode:/hadoop/dfs/name
-      - shared-workspace:/opt/workspace
+      - $HADOOP_NAMENODE_DIR:/hadoop/dfs/name
+      - $SHARED_DIR:/opt/workspace
     networks:
       - "proxnet-ext"
 
   hadoop-datanode:
     build: ./build/hadoop/datanode
     container_name: ${PROJECT_NAME}-hadoop-datanode
-    hostname: hadoop-datanode
+    hostname: ${PROJECT_NAME}-hadoop-datanode
     restart: unless-stopped
     environment:
-      SERVICE_PRECONDITION: "hadoop-namenode:9870"
+      SERVICE_PRECONDITION: "${PROJECT_NAME}-hadoop-namenode:9870"
     env_file:
       - ./build/hadoop/hadoop.env
     ports:
       - $HADOOP_DATANODE_PORT:9864  # allow host/VPN access
     volumes:
-      - hadoop_datanode:/hadoop/dfs/data
-      - shared-workspace:/opt/workspace
+      - $HADOOP_DATANODE_DIR:/hadoop/dfs/data
+      - $SHARED_DIR:/opt/workspace
     networks:
       - "proxnet-ext"
   
@@ -44,7 +44,7 @@ services:
     container_name: ${PROJECT_NAME}-hadoop-resourcemanager
     restart: unless-stopped
     environment:
-      SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864"
+      SERVICE_PRECONDITION: "${PROJECT_NAME}-hadoop-namenode:9000 ${PROJECT_NAME}-hadoop-namenode:9870 ${PROJECT_NAME}-hadoop-datanode:9864"
     env_file:
       - ./build/hadoop/hadoop.env
     networks:
@@ -55,7 +55,7 @@ services:
     container_name: ${PROJECT_NAME}-hadoop-nodemanager-1
     restart: unless-stopped
     environment:
-      SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864 hadoop-resourcemanager:8088"
+      SERVICE_PRECONDITION: "${PROJECT_NAME}-hadoop-namenode:9000 ${PROJECT_NAME}-hadoop-namenode:9870 ${PROJECT_NAME}-hadoop-datanode:9864 ${PROJECT_NAME}-hadoop-resourcemanager:8088"
     env_file:
       - ./build/hadoop/hadoop.env
     networks:
@@ -66,12 +66,12 @@ services:
     container_name: ${PROJECT_NAME}-hadoop-historyserver
     restart: unless-stopped
     environment:
-      SERVICE_PRECONDITION: "hadoop-namenode:9000 hadoop-namenode:9870 hadoop-datanode:9864 hadoop-resourcemanager:8088"
+      SERVICE_PRECONDITION: "${PROJECT_NAME}-hadoop-namenode:9000 ${PROJECT_NAME}-hadoop-namenode:9870 ${PROJECT_NAME}-hadoop-datanode:9864 ${PROJECT_NAME}-hadoop-resourcemanager:8088"
     env_file:
       - ./build/hadoop/hadoop.env
     volumes:
-      - hadoop_historyserver:/hadoop/yarn/timeline
-      - shared-workspace:/opt/workspace
+      - $HADOOP_HISTORYSERVER_DIR:/hadoop/yarn/timeline
+      - $SHARED_DIR:/opt/workspace
     networks:
       - "proxnet-ext"
 
@@ -88,10 +88,10 @@ services:
     ports:
       # - ${SPARK_MASTER_WEBUI_PORT}:8080
       #- 7077:7077  # allow docker network access
-      - ${SPARK_MASTER_PORT}:7077  # allow host/VPN access to spark
-      - ${SPARK_CONNECT_PORT}:15002  # allow host/VPN access to spark-connect
+      - $SPARK_MASTER_PORT:7077  # allow host/VPN access to spark
+      - $SPARK_CONNECT_PORT:15002  # allow host/VPN access to spark-connect
     volumes:
-      - shared-workspace:/opt/workspace
+      - $SHARED_DIR:/opt/workspace
     networks:
       - "proxnet-ext"
     depends_on:
@@ -105,9 +105,9 @@ services:
       - SPARK_WORKER_CORES=${SPARK_WORKER1_CORES}
       - SPARK_WORKER_MEMORY=${SPARK_WORKER1_MEMORY}
     ports:
-      - ${SPARK_WORKER1_WEBUI_PORT}:8081  # 8081 defined in dockerfile
+      - $SPARK_WORKER1_WEBUI_PORT:8081  # 8081 defined in dockerfile
     volumes:
-      - shared-workspace:/opt/workspace
+      - $SHARED_DIR:/opt/workspace
     networks:
       - "proxnet-ext"
     depends_on:
@@ -126,40 +126,9 @@ services:
     #ports:  # define port alias if the host machine doesn't use a public ip
     #  - ${JUPYTER_PORT}:8888
     volumes:
-      - shared-workspace:/opt/workspace
+      - $SHARED_DIR:/opt/workspace
     networks:
       - "proxnet-ext"
-
-
-volumes:
-  hadoop_namenode:
-    name: ${PROJECT_NAME}-hadoop-namenode-vol
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: $HADOOP_NAMENODE_DIR
-  hadoop_datanode:
-    name: ${PROJECT_NAME}-hadoop-datanode-vol
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: $HADOOP_DATANODE_DIR
-  hadoop_historyserver:
-    name: ${PROJECT_NAME}-hadoop-historyserver-vol
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: $HADOOP_HISTORYSERVER_DIR
-  shared-workspace:
-    name: ${PROJECT_NAME}-shared-vol
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: $SHARED_DIR
 
 
 networks:
